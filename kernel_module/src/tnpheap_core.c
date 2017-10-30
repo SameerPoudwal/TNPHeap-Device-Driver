@@ -111,18 +111,19 @@ __u64 tnpheap_commit(struct tnpheap_cmd __user *user_cmd)
                    }    
            }
            else{
-               newNode = (struct node *)kmalloc(sizeof(struct node, GFP_KERNEL));
+               newNode = (struct node *)kmalloc(sizeof(struct node), GFP_KERNEL);
                newNode->objectId = cmd.offset;
                newNode->size = cmd.size;
                newNode->versionNo = cmd.version;
                list_add(&(newNode->list), &(kernel_llist.list));
-               ret = 0
+               ret = 0;
                return ret;
 
            }
         }
         mutex_unlock(&list_lock);
     }
+    return -1;
 }
 
 
