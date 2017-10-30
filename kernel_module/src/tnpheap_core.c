@@ -45,15 +45,35 @@
 #include <linux/time.h>
 
 struct miscdevice tnpheap_dev;
+struct node kernel_llist;
+struct node {
+    __u64 objectId;
+    __u64 size;
+  //  void* k_virtual_addr;
+    __u64 versionNo;
+    struct list_head list;
+};
+
+struct mutex list_lock;
 
 __u64 tnpheap_get_version(struct tnpheap_cmd __user *user_cmd)
 {
     struct tnpheap_cmd cmd;
-    if (copy_from_user(&cmd, user_cmd, sizeof(cmd)))
+    if (copy_from_user(&cmd, user_cmd, sizeof(cmd))==0)
     {
-        return -1 ;
+        struct list_head *position;
+        struct node *llist;
+        printk("Traversing Linked List");
+        list_for_each(position, &kernel_llist.list){
+           llist = list_entry(position, struct node, list);
+           if(llist->objectId == (__u64)cmd.offset)
+           {
+               printk("Object found");
+               return llist->versionNo;
+           }
+        }
     }    
-    return 0;
+    return -1;
 }
 
 __u64 tnpheap_start_tx(struct tnpheap_cmd __user *user_cmd)
@@ -70,12 +90,39 @@ __u64 tnpheap_start_tx(struct tnpheap_cmd __user *user_cmd)
 __u64 tnpheap_commit(struct tnpheap_cmd __user *user_cmd)
 {
     struct tnpheap_cmd cmd;
+    struct node *newNode;
     __u64 ret=0;
-    if (copy_from_user(&cmd, user_cmd, sizeof(cmd)))
+
+    if (copy_from_user(&cmd, user_cmd, sizeof(cmd))==0)
     {
-        return -1 ;
+        struct list_head *position;
+        struct node *llist;
+        printk("Traversing Linked List");
+        mutex_lock(&list_lock);
+        list_for_each(position, &kernel_llist.list){
+           llist = list_entry(position, struct node, list);
+           if(llist->objectId == (__u64)cmd.offset){
+               if(llist->versionNo == cmd.version ){
+                   return ret;
+               }
+               else{
+                        ret = -1;
+                        return ret;
+                   }    
+           }
+           else{
+               newNode = (struct node *)kmalloc(sizeof(struct node, GFP_KERNEL));
+               newNode->objectId = cmd.offset;
+               newNode->size = cmd.size;
+               newNode->versionNo = cmd.version;
+               list_add(&(newNode->list), &(kernel_llist.list));
+               ret = 0
+               return ret;
+
+           }
+        }
+        mutex_unlock(&list_lock);
     }
-    return ret;
 }
 
 

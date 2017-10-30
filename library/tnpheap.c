@@ -11,9 +11,20 @@
 #include <malloc.h>
 #include <string.h>
 
+struct bufferNode {
+    __u64 objectId;
+    __u64 size;
+    void* addr;
+    __u64 version;
+    bufferNode* next;
+};
+struct bufferNode *buffer_head;
+
 __u64 tnpheap_get_version(int npheap_dev, int tnpheap_dev, __u64 offset)
 {
-     return 0;
+    struct tnpheap_cmd cmd;
+    cmd.offset = offset.getpagesize();
+    return tnpheap_ioctl(tnpheap_dev,TNPHEAP_IOCTL_GET_VERSION,&cmd);
 }
 
 
@@ -26,16 +37,56 @@ int tnpheap_handler(int sig, siginfo_t *si)
 
 void *tnpheap_alloc(int npheap_dev, int tnpheap_dev, __u64 offset, __u64 size)
 {
-    return NULL;     
+    struct tnpheap_cmd cmd;
+    cmd.offset = offset*getpagesize();
+    struct bufferNode *newNode;
+    newNode = (struct bufferNode *)malloc(sizeof(struct bufferNode));
+    struct bufferNode *temp;
+    temp = buffer_head;
+    newNode->objectId = offset;
+    newNode->size = size;
+    newNode->addr = malloc(size);
+    newNode->version = ioctl(tnpheap_dev, TNPHEAP_IOCTL_GET_VERSION,&cmd);
+    newNode->next = NULL;
+    if(buffer_head == NULL){
+        buffer_head = newNode;
+    }
+    else{ 
+        while(temp->next != NULL)
+        {
+            temp = temp->next;
+        }
+        temp->next = newNode;
+    }    
+    //list_add(&(newNode->list), &(kernel_llist.list));
+    return newNode->addr;      
 }
 
 __u64 tnpheap_start_tx(int npheap_dev, int tnpheap_dev)
 {
-    return 0;
+    struct tnpheap_cmd cmd;
 }
 
 int tnpheap_commit(int npheap_dev, int tnpheap_dev)
 {
+    struct cmd cmd;
+    struct node *temp = buffer_head;
+    while(temp->next!=NULL){
+        cmd.offset = temp->objectId;
+        __u64 currentVersion = ioctl(tnpheap_dev,TNPHEAP_IOCTL_GET_VERSION,&cmd);
+        if(currentVersion != temp->version){
+            return -1
+        }
+        temp = temp->next;
+    }
+    temp = head;
+    while(temp!=NULL){
+        if(ioctl(tnpheap_dev,TNPHEAP_IOCTL_COMMIT)==(__u64)0){
+            void *mapped_data = npheap_alloc(npheap_dev,temp->objectId,temp->size);
+            sprintf(mapped_data,"%s",temp->data);
+        }
+        temp = temp->next;
+    }
     return 0;
 }
 
