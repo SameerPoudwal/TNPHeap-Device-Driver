@@ -83,7 +83,7 @@ int tnpheap_commit(int npheap_dev, int tnpheap_dev)
     while(temp!=NULL){
         if(ioctl(tnpheap_dev,TNPHEAP_IOCTL_COMMIT)==(__u64)0){
             void *mapped_data = npheap_alloc(npheap_dev,temp->objectId,temp->size);
-            sprintf(mapped_data,"%s",temp->data);
+            sprintf(mapped_data,"%s",temp->addr);
         }
         temp = temp->next;
     }
