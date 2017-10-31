@@ -78,7 +78,7 @@ int main(int argc, char *argv[])
             sprintf(data_array[object_id].data,"%s%d",data_array[object_id].data,a);
         }
     }
-
+   
     START_TX(npheap_dev, tnpheap_dev);
     for(i = 0; i < number_of_objects*2; i++)
     {
@@ -95,6 +95,7 @@ int main(int argc, char *argv[])
             memcpy(mapped_data, data_array[i].data, data_array[i].size);
         }
     }
+    fprintf(stdout,"Commiting");
     COMMIT(npheap_dev, tnpheap_dev);
     gettimeofday(&current_time,NULL);
     msec_time = current_time.tv_usec + current_time.tv_sec*1000000;
