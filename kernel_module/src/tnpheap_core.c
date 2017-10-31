@@ -63,6 +63,7 @@ __u64 tnpheap_get_version(struct tnpheap_cmd __user *user_cmd)
     {
         struct list_head *position;
         struct node *llist;
+        struct node newNode;
         printk("Traversing Linked List");
         list_for_each(position, &kernel_llist.list){
            llist = list_entry(position, struct node, list);
@@ -71,9 +72,19 @@ __u64 tnpheap_get_version(struct tnpheap_cmd __user *user_cmd)
                printk("Object found");
                return llist->versionNo;
            }
+           else{
+            newNode = (struct node *)kmalloc(sizeof(struct node), GFP_KERNEL);
+            newNode->objectId = cmd.offset;
+            newNode->size = cmd.size;
+            newNode->versionNo = 0;
+            list_add(&(newNode->list), &(kernel_llist.list));
+            return llist->versionNo;
+           }
         }
-    }    
-    return -1;
+
+    } 
+    return -1   
+    
 }
 
 __u64 tnpheap_start_tx(struct tnpheap_cmd __user *user_cmd)
@@ -103,10 +114,17 @@ __u64 tnpheap_commit(struct tnpheap_cmd __user *user_cmd)
            llist = list_entry(position, struct node, list);
            if(llist->objectId == (__u64)cmd.offset){
                if(llist->versionNo == cmd.version ){
-                   return ret;
+                    newNode = (struct node *)kmalloc(sizeof(struct node), GFP_KERNEL);
+                    newNode->objectId = cmd.offset;
+                    newNode->size = cmd.size;
+                    newNode->versionNo = llist->versionNo + 1;
+                    list_replace(llist,newNode);
+                    kfree(llist);
+                    return ret;
                }
                else{
-                        ret = -1;
+                        printk("Version numbers dont match in kernel space");
+                        ret = 1;
                         return ret;
                    }    
            }
@@ -114,7 +132,7 @@ __u64 tnpheap_commit(struct tnpheap_cmd __user *user_cmd)
                newNode = (struct node *)kmalloc(sizeof(struct node), GFP_KERNEL);
                newNode->objectId = cmd.offset;
                newNode->size = cmd.size;
-               newNode->versionNo = cmd.version;
+               newNode->versionNo = 0;
                list_add(&(newNode->list), &(kernel_llist.list));
                ret = 0;
                return ret;
