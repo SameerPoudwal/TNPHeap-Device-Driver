@@ -78,7 +78,7 @@ int main(int argc, char *argv[])
             sprintf(data_array[object_id].data,"%s%d",data_array[object_id].data,a);
         }
     }
-   
+    fprintf(stdout,"Starting transaction");
     START_TX(npheap_dev, tnpheap_dev);
     for(i = 0; i < number_of_objects*2; i++)
     {
