@@ -63,7 +63,7 @@ __u64 tnpheap_get_version(struct tnpheap_cmd __user *user_cmd)
     {
         struct list_head *position;
         struct node *llist;
-        struct node newNode;
+        struct node *newNode;
         printk("Traversing Linked List");
         list_for_each(position, &kernel_llist.list){
            llist = list_entry(position, struct node, list);
