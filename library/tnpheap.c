@@ -20,6 +20,8 @@ struct bufferNode {
 };
 struct bufferNode *buffer_head;
 
+DEFINE_MUTEX(global_lock);
+
 __u64 tnpheap_get_version(int npheap_dev, int tnpheap_dev, __u64 offset)
 {
     struct tnpheap_cmd cmd;
@@ -32,7 +34,29 @@ __u64 tnpheap_get_version(int npheap_dev, int tnpheap_dev, __u64 offset)
     }
     fprintf(stderr,"No local version number match found");
     // return ioctl(tnpheap_dev,TNPHEAP_IOCTL_GET_VERSION,&cmd);
-    return -1;
+
+    struct bufferNode *newNode;
+    newNode = (struct bufferNode *)malloc(sizeof(struct bufferNode));
+    temp = buffer_head;
+    newNode->objectId = offset;
+    newNode->size = size;
+    newNode->addr = malloc(size);
+    newNode->version = ioctl(tnpheap_dev, TNPHEAP_IOCTL_GET_VERSION,&cmd);
+    newNode->next = NULL;
+    if(buffer_head == NULL){
+        buffer_head = newNode;
+        return buffer_head->addr;
+    }
+    else{ 
+        while(temp->next != NULL)
+        {
+            temp = temp->next;
+        }
+        temp->next = newNode;
+    }    
+    temp = temp->next;
+    //list_add(&(newNode->list), &(kernel_llist.list));
+    return temp->addr;
 }
 
 
@@ -46,29 +70,22 @@ int tnpheap_handler(int sig, siginfo_t *si)
 void *tnpheap_alloc(int npheap_dev, int tnpheap_dev, __u64 offset, __u64 size)
 {
     struct tnpheap_cmd cmd;
-    struct bufferNode *newNode;
-    cmd.offset = offset;
-    cmd.size = size;
-    newNode = (struct bufferNode *)malloc(sizeof(struct bufferNode));
+  
     struct bufferNode *temp;
     temp = buffer_head;
+
     while(temp!=NULL){
         if(temp->objectId == offset){
             free(temp->addr);
-            if(temp->size == size){
-                temp->version = ioctl(tnpheap_dev, TNPHEAP_IOCTL_GET_VERSION,&cmd);
-                return temp->addr;
-            }
-            else{
-                temp->version = ioctl(tnpheap_dev, TNPHEAP_IOCTL_GET_VERSION,&cmd);
-                temp->size = size;
-                temp->addr = malloc(size);
-                return temp->addr;
-            }
-            
+            temp->size = size;
+            temp->addr = malloc(size);
+            return temp->addr;
         }
         temp = temp->next;
     }
+
+    struct bufferNode *newNode;
+    newNode = (struct bufferNode *)malloc(sizeof(struct bufferNode));
     temp = buffer_head;
     newNode->objectId = offset;
     newNode->size = size;
@@ -84,18 +101,22 @@ void *tnpheap_alloc(int npheap_dev, int tnpheap_dev, __u64 offset, __u64 size)
             temp = temp->next;
         }
         temp->next = newNode;
-    }    
+    }  
+    temp = temp->next;  
     //list_add(&(newNode->list), &(kernel_llist.list));
-    return newNode->addr;      
+    return temp->addr;      
 }
 
 __u64 tnpheap_start_tx(int npheap_dev, int tnpheap_dev)
 {
     struct tnpheap_cmd cmd;
+
+    return ioctl(tnpheap_dev, TNPHEAP_IOCTL_START_TX, &cmd);
 }
 
 int tnpheap_commit(int npheap_dev, int tnpheap_dev)
 {
+    mutex_lock(&global_lock);
     struct tnpheap_cmd cmd;
     struct bufferNode *temp = buffer_head;
     while(temp->next!=NULL){
@@ -117,14 +138,15 @@ int tnpheap_commit(int npheap_dev, int tnpheap_dev)
         temp = temp->next;
     }
     list_free();
+    mutex_unlock(&global_lock);
     return 0;
 }
-
 
 void list_free(){
     struct bufferNode *temp;
     struct bufferNode *temp1;
     temp = buffer_head;
+
     while(temp!=NULL){
         temp1 = temp->next;
         free(temp->addr);
@@ -132,50 +154,3 @@ void list_free(){
         temp = temp1;
     }
 }
-
-// void list_free(){
-//     struct bufferNode *temp;
-//     struct bufferNode *temp1;
-//     temp = buffer_head;
-//     while(temp!=NULL){
-//         temp1 = temp;
-//         free(temp);
-//         temp = temp1->next;
-//     }
-// }
-
-// void *getObject(__u64 ObjectId)
-// {
-//     struct tnpheap_cmd cmd;
-//     struct bufferNode *newNode;
-//     newNode = (struct bufferNode *)malloc(sizeof(struct bufferNode));
-//     struct bufferNode *temp;
-//     temp = buffer_head;
-//     while(temp->next!=NULL){
-//         if(temp->objectId == offset){
-//            return temp->addr;
-//         }
-//         temp = temp->next;
-//     }
-//     temp = buffer_head;
-//     newNode->objectId = offset;
-//     newNode->size = size;
-//     newNode->addr = malloc(size);
-//     newNode->version = ioctl(tnpheap_dev, TNPHEAP_IOCTL_GET_VERSION,&cmd);
-//     newNode->next = NULL;
-//     if(buffer_head == NULL){
-//         buffer_head = newNode;
-//     }
-//     else{ 
-//         while(temp->next != NULL)
-//         {
-//             temp = temp->next;
-//         }
-//         temp->next = newNode;
-//     }    
-
-//     return newNode->addr;
-// }
-
-
-

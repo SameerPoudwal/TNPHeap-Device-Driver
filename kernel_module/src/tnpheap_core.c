@@ -1,3 +1,4 @@
+// 
 //////////////////////////////////////////////////////////////////////
 //                             North Carolina State University
 //
@@ -56,6 +57,8 @@ struct node {
 
 struct mutex list_lock;
 
+__u64 transaction_id = 0;
+
 __u64 tnpheap_get_version(struct tnpheap_cmd __user *user_cmd)
 {
     struct tnpheap_cmd cmd;
@@ -90,12 +93,15 @@ __u64 tnpheap_get_version(struct tnpheap_cmd __user *user_cmd)
 __u64 tnpheap_start_tx(struct tnpheap_cmd __user *user_cmd)
 {
     struct tnpheap_cmd cmd;
-    __u64 ret=0;
+    //__u64 ret=0;
     if (copy_from_user(&cmd, user_cmd, sizeof(cmd)))
     {
         return -1 ;
-    }    
-    return ret;
+    }
+    mutex_lock(&list_lock);
+    transaction_id++;
+    mutex_unlock(&list_lock);
+    return transaction_id;
 }
 
 __u64 tnpheap_commit(struct tnpheap_cmd __user *user_cmd)
@@ -109,7 +115,7 @@ __u64 tnpheap_commit(struct tnpheap_cmd __user *user_cmd)
         struct list_head *position;
         struct node *llist;
         printk("Traversing Linked List");
-        mutex_lock(&list_lock);
+        
         list_for_each(position, &kernel_llist.list){
            llist = list_entry(position, struct node, list);
            if(llist->objectId == (__u64)cmd.offset){
@@ -124,7 +130,7 @@ __u64 tnpheap_commit(struct tnpheap_cmd __user *user_cmd)
                else{
                         printk("Version numbers dont match in kernel space");
                         ret = 1;
-                        mutex_unlock(&list_lock);
+                        //mutex_unlock(&list_lock);
                         return ret;
                    }    
            }
@@ -134,9 +140,9 @@ __u64 tnpheap_commit(struct tnpheap_cmd __user *user_cmd)
                newNode->size = cmd.size;
                newNode->versionNo = 0;
                list_add(&(newNode->list), &(kernel_llist.list));
+               ret = 0;
            }
         }
-        mutex_unlock(&list_lock);
         return ret;
     }
     return -1;
@@ -175,8 +181,14 @@ static int __init tnpheap_module_init(void)
     int ret = 0;
     if ((ret = misc_register(&tnpheap_dev)))
         printk(KERN_ERR "Unable to register \"npheap\" misc device\n");
-    else
+    else{
         printk(KERN_ERR "\"npheap\" misc device installed\n");
+        //Initializing kernel head list.
+        INIT_LIST_HEAD(&kernel_llist.list);
+        //Initializing GLOBAL LOCK
+        mutex_init(&list_lock);
+    }
+
     return 1;
 }
 
