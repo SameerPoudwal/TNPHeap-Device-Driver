@@ -39,8 +39,8 @@ __u64 tnpheap_get_version(int npheap_dev, int tnpheap_dev, __u64 offset)
     newNode = (struct bufferNode *)malloc(sizeof(struct bufferNode));
     temp = buffer_head;
     newNode->objectId = offset;
-    newNode->size = size;
-    newNode->addr = malloc(size);
+    newNode->size = 0;
+    newNode->addr = NULL;
     newNode->version = ioctl(tnpheap_dev, TNPHEAP_IOCTL_GET_VERSION,&cmd);
     newNode->next = NULL;
     if(buffer_head == NULL){
@@ -76,10 +76,15 @@ void *tnpheap_alloc(int npheap_dev, int tnpheap_dev, __u64 offset, __u64 size)
 
     while(temp!=NULL){
         if(temp->objectId == offset){
-            free(temp->addr);
-            temp->size = size;
-            temp->addr = malloc(size);
-            return temp->addr;
+            if(temp->size != size){
+                free(temp->addr);
+                temp->size = size;
+                temp->addr = malloc(size);
+                return temp->addr;
+            }
+            else{
+                return temp->addr;
+            }
         }
         temp = temp->next;
     }
