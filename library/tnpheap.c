@@ -47,15 +47,25 @@ void *tnpheap_alloc(int npheap_dev, int tnpheap_dev, __u64 offset, __u64 size)
 {
     struct tnpheap_cmd cmd;
     struct bufferNode *newNode;
+    cmd.offset = offset;
+    cmd.size = size;
     newNode = (struct bufferNode *)malloc(sizeof(struct bufferNode));
     struct bufferNode *temp;
     temp = buffer_head;
     while(temp!=NULL){
         if(temp->objectId == offset){
             free(temp->addr);
-            temp->size = size;
-            temp->addr = malloc(size);
-            return temp->addr;
+            if(temp->size == size){
+                temp->version = ioctl(tnpheap_dev, TNPHEAP_IOCTL_GET_VERSION,&cmd);
+                return temp->addr;
+            }
+            else{
+                temp->version = ioctl(tnpheap_dev, TNPHEAP_IOCTL_GET_VERSION,&cmd);
+                temp->size = size;
+                temp->addr = malloc(size);
+                return temp->addr;
+            }
+            
         }
         temp = temp->next;
     }
@@ -103,23 +113,36 @@ int tnpheap_commit(int npheap_dev, int tnpheap_dev)
         if(ioctl(tnpheap_dev,TNPHEAP_IOCTL_COMMIT, &cmd)==(__u64)0){
             void *mapped_data = npheap_alloc(npheap_dev,temp->objectId,temp->size);
             sprintf(mapped_data,"%s",temp->addr);
-            list_free();
         }
         temp = temp->next;
     }
+    list_free();
     return 0;
 }
+
 
 void list_free(){
     struct bufferNode *temp;
     struct bufferNode *temp1;
     temp = buffer_head;
     while(temp!=NULL){
-        temp1 = temp;
+        temp1 = temp->next;
+        free(temp->addr);
         free(temp);
-        temp = temp1->next;
+        temp = temp1;
     }
 }
+
+// void list_free(){
+//     struct bufferNode *temp;
+//     struct bufferNode *temp1;
+//     temp = buffer_head;
+//     while(temp!=NULL){
+//         temp1 = temp;
+//         free(temp);
+//         temp = temp1->next;
+//     }
+// }
 
 // void *getObject(__u64 ObjectId)
 // {

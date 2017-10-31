@@ -84,7 +84,7 @@ __u64 tnpheap_get_version(struct tnpheap_cmd __user *user_cmd)
         }
 
     } 
-    return -1   
+    return -1;  
     
 }
 
@@ -121,11 +121,11 @@ __u64 tnpheap_commit(struct tnpheap_cmd __user *user_cmd)
                     newNode->versionNo = llist->versionNo + 1;
                     list_replace(llist,newNode);
                     kfree(llist);
-                    return ret;
                }
                else{
                         printk("Version numbers dont match in kernel space");
                         ret = 1;
+                        mutex_unlock(&list_lock);
                         return ret;
                    }    
            }
@@ -135,12 +135,10 @@ __u64 tnpheap_commit(struct tnpheap_cmd __user *user_cmd)
                newNode->size = cmd.size;
                newNode->versionNo = 0;
                list_add(&(newNode->list), &(kernel_llist.list));
-               ret = 0;
-               return ret;
-
            }
         }
         mutex_unlock(&list_lock);
+        return ret;
     }
     return -1;
 }
