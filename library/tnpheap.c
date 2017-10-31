@@ -20,7 +20,7 @@ struct bufferNode {
 };
 struct bufferNode *buffer_head;
 
-DEFINE_MUTEX(global_lock);
+//DEFINE_MUTEX(global_lock);
 
 __u64 tnpheap_get_version(int npheap_dev, int tnpheap_dev, __u64 offset)
 {
@@ -116,7 +116,7 @@ __u64 tnpheap_start_tx(int npheap_dev, int tnpheap_dev)
 
 int tnpheap_commit(int npheap_dev, int tnpheap_dev)
 {
-    mutex_lock(&global_lock);
+    npheap_lock(npheap_dev,10);
     struct tnpheap_cmd cmd;
     struct bufferNode *temp = buffer_head;
     while(temp->next!=NULL){
@@ -138,7 +138,7 @@ int tnpheap_commit(int npheap_dev, int tnpheap_dev)
         temp = temp->next;
     }
     list_free();
-    mutex_unlock(&global_lock);
+    npheap_unlock(npheap_dev,10);
     return 0;
 }
 
