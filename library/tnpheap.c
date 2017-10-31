@@ -24,7 +24,7 @@ __u64 tnpheap_get_version(int npheap_dev, int tnpheap_dev, __u64 offset)
 {
     struct tnpheap_cmd cmd;
     cmd.offset = offset;
-    return tnpheap_ioctl(tnpheap_dev,TNPHEAP_IOCTL_GET_VERSION,&cmd);
+    return ioctl(tnpheap_dev,TNPHEAP_IOCTL_GET_VERSION,&cmd);
 }
 
 
