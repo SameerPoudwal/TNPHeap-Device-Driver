@@ -99,7 +99,8 @@ int tnpheap_commit(int npheap_dev, int tnpheap_dev)
     }
     temp = buffer_head;
     while(temp!=NULL){
-        if(ioctl(tnpheap_dev,TNPHEAP_IOCTL_COMMIT)==(__u64)0){
+        cmd.offset = temp->objectId;
+        if(ioctl(tnpheap_dev,TNPHEAP_IOCTL_COMMIT, &cmd)==(__u64)0){
             void *mapped_data = npheap_alloc(npheap_dev,temp->objectId,temp->size);
             sprintf(mapped_data,"%s",temp->addr);
             list_free();

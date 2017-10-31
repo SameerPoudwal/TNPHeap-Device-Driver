@@ -73,6 +73,7 @@ __u64 tnpheap_get_version(struct tnpheap_cmd __user *user_cmd)
                return llist->versionNo;
            }
            else{
+            printk("Creating new Object");
             newNode = (struct node *)kmalloc(sizeof(struct node), GFP_KERNEL);
             newNode->objectId = cmd.offset;
             newNode->size = cmd.size;
