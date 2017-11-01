@@ -16,7 +16,7 @@ struct bufferNode {
     __u64 size;
     void* addr;
     __u64 version;
-    struct bufferNode* next;
+    struct bufferNode *next;
 };
 struct bufferNode *buffer_head;
 
