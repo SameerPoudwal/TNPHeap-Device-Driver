@@ -28,37 +28,6 @@ __u64 tnpheap_get_version(int npheap_dev, int tnpheap_dev, __u64 offset)
     struct tnpheap_cmd cmd;
     cmd.offset = offset;
     struct bufferNode *temp = buffer_head;
-    /*
-    while(temp!=NULL){
-        if(temp->objectId==offset){
- //           return t
-//        }
-  //  }
-//    fprintf(stderr,"No local version number match found");
-    // return ioctl(tnpheap_dev,TNPHEAP_IOCTL_GET_VERSION,&cmd);
-
-    struct bufferNode *newNode;
-    newNode = (struct bufferNode *)malloc(sizeof(struct bufferNode));
-    temp = buffer_head;
-    newNode->objectId = offset;
-    newNode->size = 0;
-    newNode->addr = NULL;
-    newNode->version = ioctl(tnpheap_dev, TNPHEAP_IOCTL_GET_VERSION,&cmd);
-    newNode->next = NULL;
-    if(buffer_head == NULL){
-        buffer_head = newNode;
-        return buffer_head->addr;
-    }
-    else{ 
-        while(temp->next != NULL)
-        {
-            temp = temp->next;
-        }
-        temp->next = newNode;
-    }    
-    temp = temp->next;
-    //list_add(&(newNode->list), &(kernel_llist.list));
-    return temp->addr;*/
     return ioctl(tnpheap_dev, TNPHEAP_IOCTL_GET_VERSION, &cmd);
 }
 
@@ -110,7 +79,6 @@ void *tnpheap_alloc(int npheap_dev, int tnpheap_dev, __u64 offset, __u64 size)
         temp->next = newNode;
     }  
     temp = temp->next;  
-    //list_add(&(newNode->list), &(kernel_llist.list));
     return temp->addr;      
 }
 
@@ -158,12 +126,6 @@ int tnpheap_commit(int npheap_dev, int tnpheap_dev)
         void *mapped_data = (void *)npheap_alloc(npheap_dev, temp->objectId, temp->size);
         memset (mapped_data, 0, temp->size);
         memcpy(mapped_data, temp->addr, temp->size);
-
-        /*
-        if(ioctl(tnpheap_dev,TNPHEAP_IOCTL_COMMIT, &cmd)==(__u64)0){
-            void *mapped_data = npheap_alloc(npheap_dev,temp->objectId,temp->size);
-            sprintf(mapped_data,"%s",temp->addr);
-        }*/
         temp = temp->next;
     }
     npheap_unlock(npheap_dev, temp->objectId);

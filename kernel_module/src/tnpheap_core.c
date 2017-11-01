@@ -50,13 +50,10 @@ struct miscdevice tnpheap_dev;
 struct node kernel_llist;
 struct node {
     __u64 objectId;
-  // __u64 size;
-  //  void* k_virtual_addr;
     __u64 versionNo;
     struct list_head list;
 };
 
-//struct mutex list_lock;
 static DEFINE_MUTEX(list_lock);
 static DEFINE_MUTEX(linklist_lock);
 
@@ -86,7 +83,6 @@ __u64 tnpheap_get_version(struct tnpheap_cmd __user *user_cmd)
         struct node *newNode;
         newNode = (struct node *)kmalloc(sizeof(struct node), GFP_KERNEL);
         newNode->objectId = cmd.offset;
-       // newNode->size = cmd.size;
         newNode->versionNo = (__u64)0;
         list_add(&newNode->list, &(kernel_llist.list));
         printk("Returning Version No. \n");
@@ -100,7 +96,6 @@ __u64 tnpheap_start_tx(struct tnpheap_cmd __user *user_cmd)
 {
     struct tnpheap_cmd cmd;
     printk("Starting tnpheap tx \n");
-    //__u64 ret=0;
     if (copy_from_user(&cmd, user_cmd, sizeof(cmd)))
     {
         return (__u64)-1 ;
@@ -129,41 +124,9 @@ __u64 tnpheap_commit(struct tnpheap_cmd __user *user_cmd)
            llist = list_entry(position, struct node, list);
            if(llist->objectId == (__u64)cmd.offset){
                 llist->versionNo++;
-
-#if 0
-              if(llist->versionNo == cmd.version ){
-                    newNode = (struct node *)kmalloc(sizeof(struct node), GFP_KERNEL);
-                    newNode->objectId = cmd.offset;
-                    //newNode->size = cmd.size;
-                    newNode->versionNo = llist->versionNo + 1;
-                    list_replace(llist,newNode);
-                    kfree(llist);
-                    return (__u64)0;
-               }else{
-                    printk("Version numbers dont match in kernel space");
-                    //mutex_unlock(&list_lock);
-                    return (__u64)1;
-            }   
-
-                    newNode = (struct node *)kmalloc(sizeof(struct node), GFP_KERNEL);
-                    newNode->objectId = cmd.offset;
-                    //newNode->size = cmd.size;
-                    
-                    //newNode->versionNo = llist->versionNo + 1;
-                    //list_replace(llist,newNode);
-                    //kfree(llist);
-#endif
                 mutex_unlock (&linklist_lock);
                 return (__u64)0;
            }
-           /*else{
-               newNode = (struct node *)kmalloc(sizeof(struct node), GFP_KERNEL);
-               newNode->objectId = cmd.offset;
-               newNode->size = cmd.size;
-               newNode->versionNo = 0;
-               list_add(&(newNode->list), &(kernel_llist.list));
-               ret = 0;
-           }*/
         }
     }
     mutex_unlock (&linklist_lock);
@@ -208,7 +171,6 @@ static int __init tnpheap_module_init(void)
         //Initializing kernel head list.
         INIT_LIST_HEAD(&kernel_llist.list);
         //Initializing GLOBAL LOCK
- //       mutex_init(&list_lock);
     }
 
     return 1;
