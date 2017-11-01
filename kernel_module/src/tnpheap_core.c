@@ -62,7 +62,7 @@ __u64 transaction_id = 0;
 __u64 tnpheap_get_version(struct tnpheap_cmd __user *user_cmd)
 {
     struct tnpheap_cmd cmd;
-    printk("Get Version called");
+    printk("Get Version called \n");
     if (copy_from_user(&cmd, user_cmd, sizeof(cmd))==0)
     {
         struct list_head *position;
@@ -77,13 +77,14 @@ __u64 tnpheap_get_version(struct tnpheap_cmd __user *user_cmd)
                return llist->versionNo;
            }
         }
-        printk("Creating new Object");
+        printk("Creating new Object \n");
         struct node *newNode;
         newNode = (struct node *)kmalloc(sizeof(struct node), GFP_KERNEL);
         newNode->objectId = cmd.offset;
         newNode->size = cmd.size;
         newNode->versionNo = (__u64)0;
         list_add(&newNode->list, &kernel_llist.list);
+        printk("Returning Version No. \n");
         return newNode->versionNo;
     } 
     return (__u64)-1;
@@ -92,7 +93,7 @@ __u64 tnpheap_get_version(struct tnpheap_cmd __user *user_cmd)
 __u64 tnpheap_start_tx(struct tnpheap_cmd __user *user_cmd)
 {
     struct tnpheap_cmd cmd;
-    printk("Starting tnpheap tx");
+    printk("Starting tnpheap tx \n");
     //__u64 ret=0;
     if (copy_from_user(&cmd, user_cmd, sizeof(cmd)))
     {
@@ -101,6 +102,7 @@ __u64 tnpheap_start_tx(struct tnpheap_cmd __user *user_cmd)
     mutex_lock(&list_lock);
     transaction_id++;
     mutex_unlock(&list_lock);
+    printk("Ending tnpheap tx \n");
     return transaction_id;
 }
 
@@ -182,7 +184,7 @@ static int __init tnpheap_module_init(void)
     if ((ret = misc_register(&tnpheap_dev)))
         printk(KERN_ERR "Unable to register \"npheap\" misc device\n");
     else{
-        printk(KERN_ERR "\"npheap\" misc device installed\n");
+        printk(KERN_ERR "\"tnpheap\" misc device installed\n");
         //Initializing kernel head list.
         INIT_LIST_HEAD(&kernel_llist.list);
         //Initializing GLOBAL LOCK
