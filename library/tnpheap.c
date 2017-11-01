@@ -24,7 +24,7 @@ struct bufferNode *buffer_head;
 
 __u64 tnpheap_get_version(int npheap_dev, int tnpheap_dev, __u64 offset)
 {
-    fprintf(stdout,"into lib get version");
+    fprintf(stderr,"into lib get version");
     struct tnpheap_cmd cmd;
     cmd.offset = offset;
     struct bufferNode *temp = buffer_head;
@@ -72,7 +72,7 @@ int tnpheap_handler(int sig, siginfo_t *si)
 
 void *tnpheap_alloc(int npheap_dev, int tnpheap_dev, __u64 offset, __u64 size)
 {
-    fprintf(stdout,"into lib alloc");
+    fprintf(stderr,"into lib alloc");
     struct tnpheap_cmd cmd;
     cmd.offset = offset;
 
@@ -117,13 +117,13 @@ void *tnpheap_alloc(int npheap_dev, int tnpheap_dev, __u64 offset, __u64 size)
 __u64 tnpheap_start_tx(int npheap_dev, int tnpheap_dev)
 {
     struct tnpheap_cmd cmd;
-    fprintf(stdout,"into lib start tx");
+    fprintf(stderr,"into lib start tx");
     return ioctl(tnpheap_dev, TNPHEAP_IOCTL_START_TX, &cmd);
 }
 
 int tnpheap_commit(int npheap_dev, int tnpheap_dev)
 {
-    fprintf(stdout,"into lib commit");
+    fprintf(stderr,"into lib commit");
     struct tnpheap_cmd cmd;
     __u64 currentVersion;
     int commit_check;

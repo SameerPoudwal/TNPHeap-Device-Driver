@@ -70,7 +70,7 @@ __u64 tnpheap_get_version(struct tnpheap_cmd __user *user_cmd)
         struct list_head *position;
         struct node *llist;
         
-        printk("Traversing Linked List \n");
+        printk("Traversing Linked List for %%lu\n", cmd.offset);
         list_for_each(position, &kernel_llist.list){
            llist = list_entry(position, struct node, list);
            if(llist->objectId == (__u64)cmd.offset)
