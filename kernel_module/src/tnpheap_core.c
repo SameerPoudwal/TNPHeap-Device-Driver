@@ -58,6 +58,7 @@ struct node {
 
 //struct mutex list_lock;
 static DEFINE_MUTEX(list_lock);
+static DEFINE_MUTEX(linklist_lock);
 
 __u64 transaction_id = 0;
 
@@ -70,12 +71,14 @@ __u64 tnpheap_get_version(struct tnpheap_cmd __user *user_cmd)
         struct list_head *position;
         struct node *llist;
         
-        printk("Traversing Linked List for %%lu\n", cmd.offset);
+        mutex_lock (&linklist_lock);
+        printk("Traversing Linked List for %llu\n", cmd.offset);
         list_for_each(position, &kernel_llist.list){
            llist = list_entry(position, struct node, list);
            if(llist->objectId == (__u64)cmd.offset)
            {
                printk("Object found %llu\n", llist->objectId);
+               mutex_unlock (&linklist_lock);
                return llist->versionNo;
            }
         }
@@ -87,6 +90,7 @@ __u64 tnpheap_get_version(struct tnpheap_cmd __user *user_cmd)
         newNode->versionNo = (__u64)0;
         list_add(&newNode->list, &(kernel_llist.list));
         printk("Returning Version No. \n");
+        mutex_unlock (&linklist_lock);
         return newNode->versionNo;
     } 
     return (__u64)-1;
@@ -120,13 +124,14 @@ __u64 tnpheap_commit(struct tnpheap_cmd __user *user_cmd)
         struct list_head *position;
         struct node *llist;
         
-        
+        mutex_lock (&linklist_lock);
         list_for_each(position, &kernel_llist.list){
            llist = list_entry(position, struct node, list);
            if(llist->objectId == (__u64)cmd.offset){
+                llist->versionNo++;
 
-
-               if(llist->versionNo == cmd.version ){
+#if 0
+              if(llist->versionNo == cmd.version ){
                     newNode = (struct node *)kmalloc(sizeof(struct node), GFP_KERNEL);
                     newNode->objectId = cmd.offset;
                     //newNode->size = cmd.size;
@@ -138,7 +143,18 @@ __u64 tnpheap_commit(struct tnpheap_cmd __user *user_cmd)
                     printk("Version numbers dont match in kernel space");
                     //mutex_unlock(&list_lock);
                     return (__u64)1;
-            }    
+            }   
+
+                    newNode = (struct node *)kmalloc(sizeof(struct node), GFP_KERNEL);
+                    newNode->objectId = cmd.offset;
+                    //newNode->size = cmd.size;
+                    
+                    //newNode->versionNo = llist->versionNo + 1;
+                    //list_replace(llist,newNode);
+                    //kfree(llist);
+#endif
+                mutex_unlock (&linklist_lock);
+                return (__u64)0;
            }
            /*else{
                newNode = (struct node *)kmalloc(sizeof(struct node), GFP_KERNEL);
@@ -150,6 +166,7 @@ __u64 tnpheap_commit(struct tnpheap_cmd __user *user_cmd)
            }*/
         }
     }
+    mutex_unlock (&linklist_lock);
     return (__u64)-1;
 }
 
