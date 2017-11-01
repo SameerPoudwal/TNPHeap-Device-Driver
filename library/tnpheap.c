@@ -24,7 +24,7 @@ struct bufferNode *buffer_head;
 
 __u64 tnpheap_get_version(int npheap_dev, int tnpheap_dev, __u64 offset)
 {
-    fprintf(stderr,"into lib get version");
+    fprintf(stderr,"into lib get version \n");
     struct tnpheap_cmd cmd;
     cmd.offset = offset;
     struct bufferNode *temp = buffer_head;
@@ -72,7 +72,7 @@ int tnpheap_handler(int sig, siginfo_t *si)
 
 void *tnpheap_alloc(int npheap_dev, int tnpheap_dev, __u64 offset, __u64 size)
 {
-    fprintf(stderr,"into lib alloc");
+    fprintf(stderr,"into lib alloc \n");
     struct tnpheap_cmd cmd;
     cmd.offset = offset;
 
@@ -117,13 +117,13 @@ void *tnpheap_alloc(int npheap_dev, int tnpheap_dev, __u64 offset, __u64 size)
 __u64 tnpheap_start_tx(int npheap_dev, int tnpheap_dev)
 {
     struct tnpheap_cmd cmd;
-    fprintf(stderr,"into lib start tx");
+    fprintf(stderr,"into lib start tx \n");
     return ioctl(tnpheap_dev, TNPHEAP_IOCTL_START_TX, &cmd);
 }
 
 int tnpheap_commit(int npheap_dev, int tnpheap_dev)
 {
-    fprintf(stderr,"into lib commit");
+    fprintf(stderr,"into lib commit \n");
     struct tnpheap_cmd cmd;
     __u64 currentVersion;
     int commit_check;
@@ -150,12 +150,13 @@ int tnpheap_commit(int npheap_dev, int tnpheap_dev)
         cmd.offset = temp->objectId;
         commit_check = ioctl(tnpheap_dev,TNPHEAP_IOCTL_COMMIT,&cmd);
         if(commit_check!=0){
-            fprintf(stderr,"Failed while commiting\n");
+            fprintf(stderr,"Failed while commiting \n");
             list_free();
             return 1;
         }
 
         void *mapped_data = (void *)npheap_alloc(npheap_dev, temp->objectId, temp->size);
+        memset (mapped_data, 0, temp->size);
         memcpy(mapped_data, temp->addr, temp->size);
 
         /*
