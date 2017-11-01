@@ -158,7 +158,7 @@ int tnpheap_commit(int npheap_dev, int tnpheap_dev)
         }
 
         void *mapped_data = (void *)npheap_alloc(npheap_dev, temp->objectId, temp->size);
-        npheap_unlock(npheap_dev, temp->objectId);
+        memcpy(mapped_data, temp->addr, temp->size);
 
         /*
         if(ioctl(tnpheap_dev,TNPHEAP_IOCTL_COMMIT, &cmd)==(__u64)0){
@@ -167,7 +167,7 @@ int tnpheap_commit(int npheap_dev, int tnpheap_dev)
         }*/
         temp = temp->next;
     }
-    memcpy(mapped_data, temp->addr, temp->size);
+    npheap_unlock(npheap_dev, temp->objectId);
     list_free();
     return 0;
 }
