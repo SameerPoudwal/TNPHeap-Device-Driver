@@ -28,13 +28,13 @@ __u64 tnpheap_get_version(int npheap_dev, int tnpheap_dev, __u64 offset)
     struct tnpheap_cmd cmd;
     cmd.offset = offset;
     struct bufferNode *temp = buffer_head;
-    
+    /*
     while(temp!=NULL){
         if(temp->objectId==offset){
-            return temp->version;
-        }
-    }
-    fprintf(stderr,"No local version number match found");
+ //           return t
+//        }
+  //  }
+//    fprintf(stderr,"No local version number match found");
     // return ioctl(tnpheap_dev,TNPHEAP_IOCTL_GET_VERSION,&cmd);
 
     struct bufferNode *newNode;
@@ -58,8 +58,8 @@ __u64 tnpheap_get_version(int npheap_dev, int tnpheap_dev, __u64 offset)
     }    
     temp = temp->next;
     //list_add(&(newNode->list), &(kernel_llist.list));
-    return temp->addr;
-    //return ioctl(tnpheap_dev, TNPHEAP_IOCTL_GET_VERSION, &cmd);
+    return temp->addr;*/
+    return ioctl(tnpheap_dev, TNPHEAP_IOCTL_GET_VERSION, &cmd);
 }
 
 
