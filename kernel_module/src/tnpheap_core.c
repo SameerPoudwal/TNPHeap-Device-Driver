@@ -44,6 +44,7 @@
 #include <linux/poll.h>
 #include <linux/mutex.h>
 #include <linux/time.h>
+#include <linux/list.h>
 
 struct miscdevice tnpheap_dev;
 struct node kernel_llist;
