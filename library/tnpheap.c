@@ -72,6 +72,7 @@ void *tnpheap_alloc(int npheap_dev, int tnpheap_dev, __u64 offset, __u64 size)
     newNode->next = NULL;
     if(buffer_head == NULL){
         buffer_head = newNode;
+        return buffer_head->addr;
     }
     else{ 
         while(temp->next != NULL)
