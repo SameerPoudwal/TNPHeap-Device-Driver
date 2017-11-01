@@ -67,7 +67,7 @@ __u64 tnpheap_get_version(struct tnpheap_cmd __user *user_cmd)
     {
         struct list_head *position;
         struct node *llist;
-        struct node *newNode;
+        
         printk("Traversing Linked List");
         list_for_each(position, &kernel_llist.list){
            llist = list_entry(position, struct node, list);
@@ -78,11 +78,12 @@ __u64 tnpheap_get_version(struct tnpheap_cmd __user *user_cmd)
            }
         }
         printk("Creating new Object");
+        struct node *newNode;
         newNode = (struct node *)kmalloc(sizeof(struct node), GFP_KERNEL);
         newNode->objectId = cmd.offset;
         newNode->size = cmd.size;
         newNode->versionNo = (__u64)0;
-        list_add(&(newNode->list), &(kernel_llist.list));
+        list_add(&newNode->list, &kernel_llist.list);
         return newNode->versionNo;
     } 
     return (__u64)-1;
@@ -91,6 +92,7 @@ __u64 tnpheap_get_version(struct tnpheap_cmd __user *user_cmd)
 __u64 tnpheap_start_tx(struct tnpheap_cmd __user *user_cmd)
 {
     struct tnpheap_cmd cmd;
+    printk("Starting tnpheap tx");
     //__u64 ret=0;
     if (copy_from_user(&cmd, user_cmd, sizeof(cmd)))
     {
