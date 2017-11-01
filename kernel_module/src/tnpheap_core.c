@@ -56,7 +56,8 @@ struct node {
     struct list_head list;
 };
 
-struct mutex list_lock;
+//struct mutex list_lock;
+static DEFINE_MUTEX(list_lock);
 
 __u64 transaction_id = 0;
 
@@ -84,7 +85,7 @@ __u64 tnpheap_get_version(struct tnpheap_cmd __user *user_cmd)
         newNode->objectId = cmd.offset;
        // newNode->size = cmd.size;
         newNode->versionNo = (__u64)0;
-        list_add(&newNode->list, &kernel_llist.list);
+        list_add(&newNode->list, &(kernel_llist.list));
         printk("Returning Version No. \n");
         return newNode->versionNo;
     } 
@@ -190,7 +191,7 @@ static int __init tnpheap_module_init(void)
         //Initializing kernel head list.
         INIT_LIST_HEAD(&kernel_llist.list);
         //Initializing GLOBAL LOCK
-        mutex_init(&list_lock);
+ //       mutex_init(&list_lock);
     }
 
     return 1;
