@@ -34,7 +34,7 @@ int main(int argc, char *argv[])
     unsigned long long msec_time;
     FILE *fp;
     struct timeval current_time;
-
+    fprintf(stdout,"Vriables declared");
     if(argc < 3)
     {
         fprintf(stderr, "Usage: %s number_of_objects max_object_size number_of_processes\n",argv[0]);
@@ -51,14 +51,14 @@ int main(int argc, char *argv[])
         fprintf(stderr, "Device open failed");
         exit(1);
     }
-    // Writing to objects
+    fprintf(stdout,"Writing to objects");// Writing to objects
     i=0;
     do{
         pid=fork();
         i++;
     }
     while(i<(number_of_processes-1) && pid != 0);
-// Generate input data 
+ fprintf(stdout,"Generate input data");
     srand((int)time(NULL)+(int)getpid());
     data_array = (struct data_array_element *)calloc(number_of_objects*2, sizeof(struct data_array_element));
     for(i = 0; i < number_of_objects; i++)
