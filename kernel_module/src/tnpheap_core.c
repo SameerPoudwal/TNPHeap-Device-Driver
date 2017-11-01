@@ -76,7 +76,7 @@ __u64 tnpheap_get_version(struct tnpheap_cmd __user *user_cmd)
            llist = list_entry(position, struct node, list);
            if(llist->objectId == (__u64)cmd.offset)
            {
-               printk("Object found %llu\n", llist->objectId);
+               printk("Object found %llu returning %llu \n", llist->objectId, llist->versionNo);
                mutex_unlock (&linklist_lock);
                return llist->versionNo;
            }
