@@ -49,7 +49,7 @@ struct miscdevice tnpheap_dev;
 struct node kernel_llist;
 struct node {
     __u64 objectId;
-    __u64 size;
+  // __u64 size;
   //  void* k_virtual_addr;
     __u64 versionNo;
     struct list_head list;
@@ -68,12 +68,12 @@ __u64 tnpheap_get_version(struct tnpheap_cmd __user *user_cmd)
         struct list_head *position;
         struct node *llist;
         
-        printk("Traversing Linked List");
+        printk("Traversing Linked List \n");
         list_for_each(position, &kernel_llist.list){
            llist = list_entry(position, struct node, list);
            if(llist->objectId == (__u64)cmd.offset)
            {
-               printk("Object found");
+               printk("Object found \n");
                return llist->versionNo;
            }
         }
@@ -81,7 +81,7 @@ __u64 tnpheap_get_version(struct tnpheap_cmd __user *user_cmd)
         struct node *newNode;
         newNode = (struct node *)kmalloc(sizeof(struct node), GFP_KERNEL);
         newNode->objectId = cmd.offset;
-        newNode->size = cmd.size;
+       // newNode->size = cmd.size;
         newNode->versionNo = (__u64)0;
         list_add(&newNode->list, &kernel_llist.list);
         printk("Returning Version No. \n");
@@ -108,6 +108,7 @@ __u64 tnpheap_start_tx(struct tnpheap_cmd __user *user_cmd)
 
 __u64 tnpheap_commit(struct tnpheap_cmd __user *user_cmd)
 {
+    printk("Into tnpheap tx \n");
     struct tnpheap_cmd cmd;
     struct node *newNode;
     __u64 ret=0;
@@ -116,7 +117,7 @@ __u64 tnpheap_commit(struct tnpheap_cmd __user *user_cmd)
     {
         struct list_head *position;
         struct node *llist;
-        printk("Traversing Linked List");
+        
         
         list_for_each(position, &kernel_llist.list){
            llist = list_entry(position, struct node, list);
@@ -126,7 +127,7 @@ __u64 tnpheap_commit(struct tnpheap_cmd __user *user_cmd)
                if(llist->versionNo == cmd.version ){
                     newNode = (struct node *)kmalloc(sizeof(struct node), GFP_KERNEL);
                     newNode->objectId = cmd.offset;
-                    newNode->size = cmd.size;
+                    //newNode->size = cmd.size;
                     newNode->versionNo = llist->versionNo + 1;
                     list_replace(llist,newNode);
                     kfree(llist);
