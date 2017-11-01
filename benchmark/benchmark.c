@@ -34,7 +34,7 @@ int main(int argc, char *argv[])
     unsigned long long msec_time;
     FILE *fp;
     struct timeval current_time;
-    fprintf(stdout,"Vriables declared");
+    fprintf(stderr,"Variables declared");
     if(argc < 3)
     {
         fprintf(stderr, "Usage: %s number_of_objects max_object_size number_of_processes\n",argv[0]);
@@ -51,14 +51,14 @@ int main(int argc, char *argv[])
         fprintf(stderr, "Device open failed");
         exit(1);
     }
-    fprintf(stdout,"Writing to objects");// Writing to objects
+    fprintf(stderr,"Writing to objects");// Writing to objects
     i=0;
     do{
         pid=fork();
         i++;
     }
     while(i<(number_of_processes-1) && pid != 0);
- fprintf(stdout,"Generate input data");
+ fprintf(stderr,"Generate input data");
     srand((int)time(NULL)+(int)getpid());
     data_array = (struct data_array_element *)calloc(number_of_objects*2, sizeof(struct data_array_element));
     for(i = 0; i < number_of_objects; i++)
@@ -78,7 +78,7 @@ int main(int argc, char *argv[])
             sprintf(data_array[object_id].data,"%s%d",data_array[object_id].data,a);
         }
     }
-    fprintf(stdout,"Starting transaction");
+    fprintf(stderr,"Starting transaction");
     START_TX(npheap_dev, tnpheap_dev);
     for(i = 0; i < number_of_objects*2; i++)
     {
@@ -95,7 +95,7 @@ int main(int argc, char *argv[])
             memcpy(mapped_data, data_array[i].data, data_array[i].size);
         }
     }
-    fprintf(stdout,"Commiting");
+    fprintf(stderr,"Commiting");
     COMMIT(npheap_dev, tnpheap_dev);
     gettimeofday(&current_time,NULL);
     msec_time = current_time.tv_usec + current_time.tv_sec*1000000;
