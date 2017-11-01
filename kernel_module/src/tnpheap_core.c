@@ -62,6 +62,7 @@ __u64 transaction_id = 0;
 __u64 tnpheap_get_version(struct tnpheap_cmd __user *user_cmd)
 {
     struct tnpheap_cmd cmd;
+    printk("Get Version called");
     if (copy_from_user(&cmd, user_cmd, sizeof(cmd))==0)
     {
         struct list_head *position;
@@ -75,19 +76,16 @@ __u64 tnpheap_get_version(struct tnpheap_cmd __user *user_cmd)
                printk("Object found");
                return llist->versionNo;
            }
-           else{
-            printk("Creating new Object");
-            newNode = (struct node *)kmalloc(sizeof(struct node), GFP_KERNEL);
-            newNode->objectId = cmd.offset;
-            newNode->size = cmd.size;
-            newNode->versionNo = 0;
-            list_add(&(newNode->list), &(kernel_llist.list));
-            return llist->versionNo;
-           }
         }
-
+        printk("Creating new Object");
+        newNode = (struct node *)kmalloc(sizeof(struct node), GFP_KERNEL);
+        newNode->objectId = cmd.offset;
+        newNode->size = cmd.size;
+        newNode->versionNo = (__u64)0;
+        list_add(&(newNode->list), &(kernel_llist.list));
+        return newNode->versionNo;
     } 
-    return -1;
+    return (__u64)-1;
 }
 
 __u64 tnpheap_start_tx(struct tnpheap_cmd __user *user_cmd)
@@ -96,7 +94,7 @@ __u64 tnpheap_start_tx(struct tnpheap_cmd __user *user_cmd)
     //__u64 ret=0;
     if (copy_from_user(&cmd, user_cmd, sizeof(cmd)))
     {
-        return -1 ;
+        return (__u64)-1 ;
     }
     mutex_lock(&list_lock);
     transaction_id++;
@@ -119,6 +117,8 @@ __u64 tnpheap_commit(struct tnpheap_cmd __user *user_cmd)
         list_for_each(position, &kernel_llist.list){
            llist = list_entry(position, struct node, list);
            if(llist->objectId == (__u64)cmd.offset){
+
+
                if(llist->versionNo == cmd.version ){
                     newNode = (struct node *)kmalloc(sizeof(struct node), GFP_KERNEL);
                     newNode->objectId = cmd.offset;
@@ -126,26 +126,24 @@ __u64 tnpheap_commit(struct tnpheap_cmd __user *user_cmd)
                     newNode->versionNo = llist->versionNo + 1;
                     list_replace(llist,newNode);
                     kfree(llist);
-               }
-               else{
-                        printk("Version numbers dont match in kernel space");
-                        ret = 1;
-                        //mutex_unlock(&list_lock);
-                        return ret;
-                   }    
+                    return (__u64)0;
+               }else{
+                    printk("Version numbers dont match in kernel space");
+                    //mutex_unlock(&list_lock);
+                    return (__u64)1;
+            }    
            }
-           else{
+           /*else{
                newNode = (struct node *)kmalloc(sizeof(struct node), GFP_KERNEL);
                newNode->objectId = cmd.offset;
                newNode->size = cmd.size;
                newNode->versionNo = 0;
                list_add(&(newNode->list), &(kernel_llist.list));
                ret = 0;
-           }
+           }*/
         }
-        return ret;
     }
-    return -1;
+    return (__u64)-1;
 }
 
 
