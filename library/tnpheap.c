@@ -106,8 +106,8 @@ int tnpheap_commit(int npheap_dev, int tnpheap_dev)
 
     while(temp!=NULL){
         cmd.offset = temp->objectId;
-        // currentVersion = tnpheap_get_version(npheap_dev, tnpheap_dev, offset);
-        currentVersion = ioctl(tnpheap_dev,TNPHEAP_IOCTL_GET_VERSION,&cmd);
+        currentVersion = tnpheap_get_version(npheap_dev, tnpheap_dev, cmd.offset);
+        // currentVersion = ioctl(tnpheap_dev,TNPHEAP_IOCTL_GET_VERSION,&cmd);
         if(currentVersion != temp->version){
             list_free();
             return 1;
