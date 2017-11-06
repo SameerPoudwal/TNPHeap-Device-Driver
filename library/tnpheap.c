@@ -100,9 +100,9 @@ int tnpheap_commit(int npheap_dev, int tnpheap_dev)
     int commit_check;
     struct bufferNode *temp = buffer_head;
 
-    if(buffer_head == NULL){
-        return 1;
-    }
+    // if(buffer_head == NULL){
+    //     return 1;
+    // }
 
     while(temp!=NULL){
         cmd.offset = temp->objectId;
