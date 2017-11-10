@@ -88,7 +88,8 @@ void *tnpheap_alloc(int npheap_dev, int tnpheap_dev, __u64 offset, __u64 size)
 __u64 tnpheap_start_tx(int npheap_dev, int tnpheap_dev)
 {
     struct tnpheap_cmd cmd;
-    fprintf(stderr,"into lib start tx \n");
+    // fprintf(stderr,"into lib start tx \n");
+    printf("%s : %d \n", __FILE__,__LINE__);
     return ioctl(tnpheap_dev, TNPHEAP_IOCTL_START_TX, &cmd);
 }
 
