@@ -120,7 +120,7 @@ int tnpheap_commit(int npheap_dev, int tnpheap_dev)
 
     //implementing lock
     // npheap_lock(npheap_dev,temp->objectId);
-    // npheap_lock(npheap_dev,buffer_head->objectId);
+    npheap_lock(npheap_dev,buffer_head->objectId);
     temp = buffer_head;
     while(temp!=NULL){
         cmd.offset = temp->objectId;
@@ -137,7 +137,7 @@ int tnpheap_commit(int npheap_dev, int tnpheap_dev)
         temp = temp->next;
     }
     // npheap_unlock(npheap_dev, temp->objectId);
-    // npheap_unlock(npheap_dev, buffer_head->objectId);
+    npheap_unlock(npheap_dev, buffer_head->objectId);
     list_free();
     return 0;
 }
