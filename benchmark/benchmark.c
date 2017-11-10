@@ -95,6 +95,7 @@ int main(int argc, char *argv[])
                 fprintf(stderr,"Failed in npheap_alloc()\n");
                 exit(1);
             }
+            fprintf(stderr, "tnpheap alloc worked")
             memset(mapped_data, 0, data_array[i].size);
             memcpy(mapped_data, data_array[i].data, data_array[i].size);
         }
