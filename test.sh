@@ -1,19 +1,17 @@
-sudo insmod /NPHeap/npheap.ko
-sudo chmod 777 /dev/npheap
-cd kernel_module
-sudo make clean
-make
-sudo make install
-cd ..
-cd library
-sudo make clean
-make
-sudo make install
-cd ..
-cd benchmark
-sudo make clean
-sudo make benchmark
-sudo make validate
+cd kernel_module || exit 1
+sudo make clean || exit 1
+make || exit 1
+sudo make install || exit 1
+cd .. || exit 1
+cd library || exit 1
+sudo make clean || exit 1
+make || exit 1
+sudo make install || exit 1
+cd .. || exit 1
+cd benchmark || exit 1
+sudo make clean || exit 1
+sudo make benchmark || exit 1
+sudo make validate || exit 1
 cd ..
 sudo insmod kernel_module/tnpheap.ko
 sudo chmod 777 /dev/tnpheap

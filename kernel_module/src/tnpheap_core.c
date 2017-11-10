@@ -102,11 +102,7 @@ __u64 tnpheap_start_tx(struct tnpheap_cmd __user *user_cmd)
     {
         return (__u64)-1 ;
     }
-    mutex_lock(&list_lock);
-    transaction_id++;
-    mutex_unlock(&list_lock);
-    printk("Ending tnpheap tx \n");
-    return transaction_id;
+    return 0;
 }
 
 __u64 tnpheap_commit(struct tnpheap_cmd __user *user_cmd)
@@ -147,6 +143,7 @@ __u64 tnpheap_ioctl(struct file *filp, unsigned int cmd,
         return tnpheap_get_version((void __user *) arg);
     case TNPHEAP_IOCTL_COMMIT:
         return tnpheap_commit((void __user *) arg);
+        
     default:
         return -ENOTTY;
     }
