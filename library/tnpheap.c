@@ -20,7 +20,7 @@ struct bufferNode {
     __u64 version;
     struct bufferNode *next;
 };
-struct bufferNode *buffer_head;
+struct bufferNode *buffer_head = NULL;
 
 //DEFINE_MUTEX(global_lock);
 
