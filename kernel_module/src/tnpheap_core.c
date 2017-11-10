@@ -70,14 +70,14 @@ __u64 tnpheap_get_version(struct tnpheap_cmd __user *user_cmd)
         struct list_head *position;
         struct node *llist;
         
-        // mutex_lock (&linklist_lock);
+        mutex_lock (&linklist_lock);
         printk("Traversing Linked List for %llu\n", cmd.offset);
         list_for_each(position, &kernel_llist.list){
            llist = list_entry(position, struct node, list);
            if(llist->objectId == (__u64)cmd.offset)
            {
                printk("Object found %llu returning %llu \n", llist->objectId, llist->versionNo);
-            //    mutex_unlock (&linklist_lock);
+               mutex_unlock (&linklist_lock);
                return llist->versionNo;
            }
         }
@@ -88,7 +88,7 @@ __u64 tnpheap_get_version(struct tnpheap_cmd __user *user_cmd)
         newNode->versionNo = (__u64)0;
         list_add(&newNode->list, &(kernel_llist.list));
         printk("Returning Version No. \n");
-        // mutex_unlock (&linklist_lock);
+        mutex_unlock (&linklist_lock);
         return newNode->versionNo;
     } 
     return (__u64)-1;
