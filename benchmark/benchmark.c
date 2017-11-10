@@ -53,11 +53,15 @@ int main(int argc, char *argv[])
     }
     fprintf(stderr,"Writing to objects");// Writing to objects
     i=0;
-    do{
-        pid=fork();
+    while(i<(number_of_processes-1) && pid != 0){
+        pid = fork();
         i++;
-    }
-    while(i<(number_of_processes-1) && pid != 0);
+    } 
+       // do{
+    //     pid=fork();
+    //     i++;
+    // }
+    // while(i<(number_of_processes-1) && pid != 0);
  fprintf(stderr,"Generate input data");
     srand((int)time(NULL)+(int)getpid());
     data_array = (struct data_array_element *)calloc(number_of_objects*2, sizeof(struct data_array_element));
