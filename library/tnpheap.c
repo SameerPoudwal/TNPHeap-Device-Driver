@@ -116,7 +116,7 @@ int tnpheap_commit(int npheap_dev, int tnpheap_dev)
         }
         temp = temp->next;
     }
-    fprintf(stderr, "all versions match \n")
+    fprintf(stderr, "all versions match \n");
 
     //implementing lock
     // npheap_lock(npheap_dev,temp->objectId);
