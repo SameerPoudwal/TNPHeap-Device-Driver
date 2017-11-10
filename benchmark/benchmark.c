@@ -84,6 +84,7 @@ int main(int argc, char *argv[])
     }
     fprintf(stderr,"Starting transaction");
     START_TX(npheap_dev, tnpheap_dev);
+    fprintf(stderr,"Returned from start tx");
     for(i = 0; i < number_of_objects*2; i++)
     {
         if(data_array[i].size)
