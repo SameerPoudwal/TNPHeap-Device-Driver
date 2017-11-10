@@ -97,7 +97,7 @@ int tnpheap_commit(int npheap_dev, int tnpheap_dev)
     fprintf(stderr,"into lib commit \n");
     struct tnpheap_cmd cmd;
     __u64 currentVersion;
-    int commit_check;
+    __u64 commit_check;
     struct bufferNode *temp = buffer_head;
 
     if(buffer_head == NULL){
@@ -116,7 +116,8 @@ int tnpheap_commit(int npheap_dev, int tnpheap_dev)
     }
 
     //implementing lock
-    npheap_lock(npheap_dev,temp->objectId);
+    // npheap_lock(npheap_dev,temp->objectId);
+    npheap_lock(npheap_dev,buffer_head->objectId);
     temp = buffer_head;
     while(temp!=NULL){
         cmd.offset = temp->objectId;
@@ -132,7 +133,8 @@ int tnpheap_commit(int npheap_dev, int tnpheap_dev)
         memcpy(mapped_data, temp->addr, temp->size);
         temp = temp->next;
     }
-    npheap_unlock(npheap_dev, temp->objectId);
+    // npheap_unlock(npheap_dev, temp->objectId);
+    npheap_unlock(npheap_dev, buffer_head->objectId);
     list_free();
     return 0;
 }
