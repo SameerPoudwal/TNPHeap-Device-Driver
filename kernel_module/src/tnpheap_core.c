@@ -102,6 +102,7 @@ __u64 tnpheap_start_tx(struct tnpheap_cmd __user *user_cmd)
     {
         return (__u64)-1 ;
     }
+    INIT_LIST_HEAD(&kernel_llist.list);
     return 0;
 }
 
@@ -168,7 +169,7 @@ static int __init tnpheap_module_init(void)
     else{
         printk(KERN_ERR "\"tnpheap\" misc device installed\n");
         //Initializing kernel head list.
-        INIT_LIST_HEAD(&kernel_llist.list);
+        
         //Initializing GLOBAL LOCK
     }
 
